@@ -1,0 +1,78 @@
+doctype html
+html
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        title Tareas Pendientes
+
+    body
+        header
+            h1 Sistema de notas y tareas
+            
+
+        .contenedor
+            h2 Agregar tarea
+
+            input#tituloTarea(type="text", placeholder="Escribe una tarea...")
+            button(onclick="agregarTarea()") Agregar
+
+            h2 Mis tareas
+
+            #listaTareas
+
+        script.
+            function cargarTareas() {
+                fetch('/api/tareas')
+                    .then(response => response.json())
+                    .then(tareas => {
+                        const lista = document.getElementById('listaTareas');
+
+                        lista.innerHTML = '';
+
+                        tareas.forEach(tarea => {
+                            const div = document.createElement('div');
+
+                            div.className = 'tarea';
+
+                            div.innerHTML = '<p>' + tarea.titulo + '</p>';
+
+                            lista.appendChild(div);
+                        });
+                    })
+                    .catch(error => {
+                        console.log('Error:', error);
+                    });
+            }
+
+            function agregarTarea() {
+                const input = document.getElementById('tituloTarea');
+                const titulo = input.value;
+
+                if (titulo.trim() === '') {
+                    alert('Escribe una tarea');
+                    return;
+                }
+
+                fetch('/api/tareas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        titulo: titulo
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Tarea agregada:', data);
+
+                    input.value = '';
+
+                    cargarTareas();
+                })
+                .catch(error => {
+                    console.log('Error:', error);
+                });
+            }
+
+            cargarTareas();
